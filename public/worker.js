@@ -1,4 +1,4 @@
-let CACHE_NAME = "Temul";
+let CACHE_NAME = "Temulv1";
 let urlsToCache = [
   '/',
   '/public'
@@ -33,7 +33,7 @@ self.addEventListener('fetch', event => {
 
 // Update a service worker
 self.addEventListener('activate', event => {
-  let cacheWhitelist = ['Temul'];
+  let cacheWhitelist = ['Temulv1'];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
