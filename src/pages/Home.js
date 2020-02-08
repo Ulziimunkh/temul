@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Banner from "../components/Banner";
+import WordList from "../components/WordList";
 export default function Home() {
-  return (
-    <>
-      
-    </>
-  );
+    return (
+      <>
+  <WordList></WordList>
+      </>
+    );
+
 }
