@@ -1,10 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import WordList from "../components/WordList";
+import WordContainer from "../components/WordContainer";
 export default function Home() {
   return (
     <>
-      <WordList></WordList>
+      <WordContainer></WordContainer>
     </>
   );
 }

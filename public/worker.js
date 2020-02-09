@@ -1,47 +1,76 @@
-let CACHE_NAME = "Temulv1";
-let urlsToCache = [
-  '/',
-  '/public'
+let CACHE_NAME = "Temulv2";
+const staticCacheName = "site-static-v1";
+const dynamicCacheName = "site-dynamic-v1";
+const urlsToCache = [
+  "/",
+  "/public",
+  "/index.html",
+  "/logo192.png",
+  "/favicon.ico",
+  "/logo512.png",
+  "../src/images/gif/loading-arrow.gif",
+  "../src/images/gif/loading-gear.gif",
+  "../src/images/icons/logo.png",
+  "../src/images/icons/logo.svg",
+  "https://fonts.googleapis.com/css?family=Roboto+Mono"
 ];
 
-// Install a service worker
-self.addEventListener('install', event => {
-  // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+// cache size limir function
+const limitCacheSize = (name, size) => {
+  caches.open(name).then(cache => {
+    cache.keys().then(keys => {
+      if (keys.length > size)
+        cache.delete(keys[0]).then(limitCacheSize(name, size));
+    });
+  });
+};
+// install Service Worker
+self.addEventListener("install", evt => {
+  evt.waitUntil(
+    // console.log('service worker has been installed')
+    caches.open(staticCacheName).then(cache => {
+      console.log("caching all assets");
+      cache.addAll(urlsToCache);
+    })
   );
 });
 
 // Cache and return requests
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          return response;
+self.addEventListener('fetch', evt => {
+  evt.respondWith(
+    caches
+      .match(evt.request)
+      .then(cacheRes => {
+        return (
+          cacheRes ||
+          fetch(evt.request).then(fetchRes => {
+            return caches.open(dynamicCacheName).then(cache => {
+              cache.put(evt.request.url, fetchRes.clone());
+              limitCacheSize(dynamicCacheName, 15);
+              return fetchRes;
+            });
+          })
+        );
+      })
+      .catch(() => {
+        if (evt.request.url.indexOf(".html") > -1) {
+          return caches.match("/pages/fallback.html");
         }
-        return fetch(event.request);
-      }
-    )
+      })
   );
 });
 
-// Update a service worker
-self.addEventListener('activate', event => {
-  let cacheWhitelist = ['Temulv1'];
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
+
+// activate vente
+self.addEventListener("activate", evt => {
+  // console.log('service worker has been activated');
+  evt.waitUntil(
+    caches.keys().then(keys => {
+      //console.log(keys);
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
+        keys
+          .filter(key => key !== staticCacheName && key !== dynamicCacheName)
+          .map(key => caches.delete(key))
       );
     })
   );

@@ -1,19 +1,13 @@
 import React, { Component } from "react";
 import allwords from "./db/ielts.json";
 const WordContext = React.createContext();
-// RoomContext.Provider value ={}
 class WordProvider extends Component {
   state = {
     words: [],
     sortedWords: [],
-    featuredWords: [],
-    loading: true,
+    loading: false,
     types: "all",
-    en: '',
-    mn: '',
-    form: '',
-    mn2: '',
-    form1: ''
+    searchText: ""
   };
   //   getData
   componentDidMount() {
@@ -21,40 +15,45 @@ class WordProvider extends Component {
     let words = allwords.feed.entry;
     this.setState({
       words,
-      sortedWords: words,
-      loading: false
+      sortedWords: words
     });
   }
 
-  
-  filterRooms = () =>{
-    let {words} = this.state;
-  let tempRooms = [...words];
+  onChange = event => {
+    let value = event.target.value;
+    this.setState({ searchText: value }, this.filterWords);
+  };
 
-  
+  filterWords = () => {
+    let { words, searchText } = this.state;
+    let tempWords = [...words];
+    let f = searchText.trim().toLowerCase();
+    tempWords = tempWords.filter(word =>
+      word.gsx$word.$t.toLowerCase().includes(f)
+    );
     // change the state
     this.setState({
-    sortedRooms: tempRooms
-  })
-  }
+      sortedWords: tempWords
+    });
+  };
   render() {
     return (
-      <WordContext.Provider value={{ ...this.state, getRoom: this.getRoom, handleChange: this.handleChange }}>
+      <WordContext.Provider value={{ ...this.state, onChange: this.onChange }}>
         {this.props.children}
       </WordContext.Provider>
     );
   }
 }
 
-const RoomConsumer = RoomContext.Consumer;
+const WordConsumer = WordContext.Consumer;
 
-export function withRoomConsumer(Component) {
+export function withWordConsumer(Component) {
   return function ConsumerWrapper(props) {
     return (
-      <RoomConsumer>
+      <WordConsumer>
         {value => <Component {...props} context={value}></Component>}
-      </RoomConsumer>
+      </WordConsumer>
     );
   };
 }
-export { RoomProvider, RoomConsumer, RoomContext };
+export { WordProvider, WordConsumer, WordContext };
