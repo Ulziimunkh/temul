@@ -1,4 +1,3 @@
-let CACHE_NAME = "Temulv2";
 const staticCacheName = "site-static-v1";
 const dynamicCacheName = "site-dynamic-v1";
 const urlsToCache = [
